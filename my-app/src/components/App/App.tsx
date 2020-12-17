@@ -1,16 +1,24 @@
 import React, { useState } from 'react';
 import './App.scss';
 import { v4 as uuidv4 } from 'uuid';
-import NumberDisplay from '../NumberDisplay';
-import { generateCells } from '../../utils/index';
-import { Button } from '../Button/index';
+import NumberDisplay from '../NumberDisplay/NumberDisplay';
+import { generateCells } from '../../utils/utils';
+import { Button } from '../Button/Button';
 
 const App: React.FC = () => {
   const [cells, setCells] = useState(generateCells());
 
+  console.log(cells); // checking cells
+
   const renderCells = (): React.ReactNode => {
     return cells.map((row, rowIndex) =>
-      row.map((cell, colIndex) => <Button key={uuidv4()} />)
+      row.map((cell, colIndex) => <Button
+        key={uuidv4()}
+        row={rowIndex}
+        col={colIndex}
+        state={cell.state}
+        value={cell.value}
+      />)
     );
   };
 
