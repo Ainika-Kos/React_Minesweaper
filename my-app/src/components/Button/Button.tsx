@@ -3,7 +3,6 @@ import { CellState, CellValue } from '../../types/types';
 import './Button.scss';
 
 interface ButtonProps {
-  disabled: boolean;
   row: number;
   col: number;
   state: CellState;
@@ -14,7 +13,7 @@ interface ButtonProps {
 }
 
 export const Button: React.FC<ButtonProps> = ({ 
-  row, col, state, onContext, value, onClick, red, disabled }) => {
+  row, col, state, onContext, value, onClick, red }) => {
   const renderContent = (): React.ReactNode => {
     if (state === CellState.visible) {
       if (value === CellValue.bomb) {
@@ -41,17 +40,13 @@ export const Button: React.FC<ButtonProps> = ({
     return null;
   };
 
-  const handleKeyDown = () => {
-    
-  };
-
   return (
     <div
-      className={`Button ${state === CellState.visible ? 'visible' : ''} value-${value} ${red ? 'red' : ''} ${disabled ? 'disabled' : ''}`}
-      onClick={onClick(row, col)}
       role="button"
+      className={`Button ${state === CellState.visible ? 'visible' : ''} value-${value} ${red ? 'red' : ''}`}
+      onClick={onClick(row, col)}
       tabIndex={0}
-      onKeyDown={handleKeyDown}
+      onKeyDown={onClick(row, col)}
       onContextMenu={onContext(row, col)}
     >
       {renderContent()}

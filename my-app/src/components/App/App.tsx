@@ -6,6 +6,7 @@ import { generateCells, openMultipleCells } from '../../utils/utils';
 import { Button } from '../Button/Button';
 import { Cell, CellState, CellValue, Face } from '../../types/types';
 import { MAX_COLS, MAX_ROWS } from '../../constants/constants';
+import { Text } from '../Text/Text';
 
 const App: React.FC = () => {
   const [cells, setCells] = useState<Cell[][]>(generateCells());
@@ -15,35 +16,33 @@ const App: React.FC = () => {
   const [bombCounter, setBombCounter] = useState(10);
   const [hasLost, setHasLost] = useState<boolean>(false);
   const [hasWon, setHasWon] = useState<boolean>(false);
-  const [disabled, setDisabled] = useState(false);
-
-  // On every mouse down/up change face
-  
-  useEffect(() => {
-    const handleMouseDown = (): void => {
-      setFace(Face.oh);
-    };
+  const [timeResult, setTimeResult] = useState<number>(0);
 
 
-    // It doesn't work normally!!
+  // On every mouse down/up change face - It doesn't work normally!!
 
-    // const handleMouseUp = (): void => {
-    //   setFace(Face.smile);
-    // };
+  // useEffect(() => {
+  //   const handleMouseDown = (): void => {
+  //     setFace(Face.oh);
+  //   };
 
-    window.addEventListener('mousedown', handleMouseDown);
-    // window.addEventListener('mouseup', handleMouseUp);
+  //   // const handleMouseUp = (): void => {
+  //   //   setFace(Face.smile);
+  //   // };
 
-    return () => {
-      window.removeEventListener('mousedown', handleMouseDown);
-      // window.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, []);
+  //   window.addEventListener('mousedown', handleMouseDown);
+  //   // window.addEventListener('mouseup', handleMouseUp);
 
-  // add time in the start (live) till hasWon/hasLost
+  //   return () => {
+  //     window.removeEventListener('mousedown', handleMouseDown);
+  //     // window.removeEventListener('mouseup', handleMouseUp);
+  //   };
+  // }, [live]);
+
+  // add time in the start (live) till hasWon/hasLost, after clear
 
   useEffect(() => {
-    if (live && time < 999) {
+    if (live && time < 999 && !hasLost && !hasWon) {
       const timer = setInterval(() => {
         setTime(time + 1);
       }, 1000);
@@ -52,22 +51,27 @@ const App: React.FC = () => {
         clearInterval(timer);
       };
     }
-  }, [live, time]);
+  }, [live, time, hasLost, hasWon]);
 
   useEffect(() => {
     if (hasLost) {
       setLive(false);
       setFace(Face.lost);
-      setDisabled(true);
+      setTimeResult(time);
     }
-  }, [hasLost]);
+
+    return () => {
+      setFace(Face.smile);
+    };
+  }, [hasLost, time]);
 
   useEffect(() => {
     if (hasWon) {
       setLive(false);
       setFace(Face.won);
+      setTimeResult(time);
     }
-  }, [hasWon]);
+  }, [hasWon, time]);
 
   const handleCellClick = (rowParam: number, colParam: number) => (): void => {
     let newCells = cells.slice();
@@ -90,7 +94,7 @@ const App: React.FC = () => {
 
     // if currentCell state is flagged or visible
 
-    if ([CellState.flagged, CellState.visible].includes(currentCell.state)) {
+    if ([CellState.flagged, CellState.visible].includes(currentCell.state) || hasLost || hasWon) {
       return;
     }
 
@@ -113,10 +117,7 @@ const App: React.FC = () => {
       for (let col = 0; col < MAX_COLS; col++) {
         currentCell = newCells[row][col];
 
-        if (
-          currentCell.value !== CellValue.bomb &&
-          currentCell.state === CellState.open
-        ) {
+        if (currentCell.value !== CellValue.bomb && currentCell.state === CellState.open) {
           safeOpenCellsExists = true;
           break;
         }
@@ -124,12 +125,12 @@ const App: React.FC = () => {
     }
 
     if (!safeOpenCellsExists) {
-      newCells = newCells.map(row =>
-        row.map(cell => {
+      newCells = newCells.map((row) =>
+        row.map((cell) => {
           if (cell.value === CellValue.bomb) {
             return {
               ...cell,
-              state: CellState.flagged
+              state: CellState.flagged,
             };
           }
           return cell;
@@ -146,7 +147,7 @@ const App: React.FC = () => {
   ): void => {
     e.preventDefault();
 
-    if (!live) {
+    if (!live || hasLost || hasWon) {
       return;
     }
 
@@ -165,7 +166,6 @@ const App: React.FC = () => {
       setBombCounter(bombCounter + 1);
     }
   };
-
 
   const handleFaceClick = (): void => {
     setLive(false);
@@ -187,7 +187,6 @@ const App: React.FC = () => {
           row={rowIndex}
           state={cell.state}
           value={cell.value}
-          disabled={disabled}
         />
       ))
     );
@@ -195,12 +194,12 @@ const App: React.FC = () => {
 
   const showAllBombs = (): Cell[][] => {
     const currentCells = cells.slice();
-    return currentCells.map(row =>
-      row.map(cell => {
+    return currentCells.map((row) =>
+      row.map((cell) => {
         if (cell.value === CellValue.bomb) {
           return {
             ...cell,
-            state: CellState.visible
+            state: CellState.visible,
           };
         }
 
@@ -209,24 +208,42 @@ const App: React.FC = () => {
     );
   };
 
+  
+
   return (
-    <div className="App">
-      <div className="Header">
-        <NumberDisplay value={bombCounter} />
-        <div
-          className="Face"
-          onClick={handleFaceClick}
-          role="button"
-          tabIndex={0}
-          onKeyDown={handleFaceClick}
-        >
-          <span role="img" aria-label="face">
-            {face}
-          </span>
+    <div>
+      <div className="App">
+        <div className="Header">
+          <NumberDisplay value={bombCounter} />
+          <div
+            className="Face"
+            onClick={handleFaceClick}
+            role="button"
+            tabIndex={0}
+            onKeyDown={handleFaceClick}
+          >
+            <span role="img" aria-label="face">
+              {face}
+            </span>
+          </div>
+          <NumberDisplay value={time} />
         </div>
-        <NumberDisplay value={time} />
+        <div className="Body">{renderCells()}</div>
       </div>
-      <div className="Body">{renderCells()}</div>
+      {hasWon && (
+        <Text
+          text="You won"
+          time={timeResult}
+          hasWon={hasWon}
+        />
+      )}
+      {hasLost && (
+        <Text
+          text="You lost"
+          time={timeResult}
+          hasLost={hasLost}
+        />
+      )}
     </div>
   );
 };

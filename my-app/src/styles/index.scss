@@ -15,6 +15,13 @@
     border-top-color: #7b7b7b;
   }
 
+  &:disabled {
+    border-right-color: #999;
+    border-bottom-color: #999;
+    border-left-color:#fff;
+    border-top-color: #fff;
+  }
+
   &.focus {
       outline: none;
   }

@@ -1,5 +1,6 @@
 @import '../../styles/index.scss';
 
+
 .Button {
   @include borders(#fff, #999);
   @include buttons;
@@ -18,10 +19,6 @@
 
   &.red {
       background-color: red;
-  }
-
-  &.disabled {
-      cursor: not-allowed;
   }
 
   span {

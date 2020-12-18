@@ -1,0 +1,12 @@
+.Text {
+    text-align: center;
+    font-size: 16px;
+
+  &.green {
+      color: green;
+  }
+
+  &.red {
+      color: red;
+  }
+}
