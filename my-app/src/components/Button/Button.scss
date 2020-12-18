@@ -20,6 +20,10 @@
       background-color: red;
   }
 
+  &.disabled {
+      cursor: not-allowed;
+  }
+
   span {
     font-size: 18px;
   }

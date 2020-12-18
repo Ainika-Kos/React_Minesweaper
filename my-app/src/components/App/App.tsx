@@ -15,6 +15,7 @@ const App: React.FC = () => {
   const [bombCounter, setBombCounter] = useState(10);
   const [hasLost, setHasLost] = useState<boolean>(false);
   const [hasWon, setHasWon] = useState<boolean>(false);
+  const [disabled, setDisabled] = useState(false);
 
   // On every mouse down/up change face
   
@@ -22,6 +23,9 @@ const App: React.FC = () => {
     const handleMouseDown = (): void => {
       setFace(Face.oh);
     };
+
+
+    // It doesn't work normally!!
 
     // const handleMouseUp = (): void => {
     //   setFace(Face.smile);
@@ -35,6 +39,8 @@ const App: React.FC = () => {
       // window.removeEventListener('mouseup', handleMouseUp);
     };
   }, []);
+
+  // add time in the start (live) till hasWon/hasLost
 
   useEffect(() => {
     if (live && time < 999) {
@@ -52,6 +58,7 @@ const App: React.FC = () => {
     if (hasLost) {
       setLive(false);
       setFace(Face.lost);
+      setDisabled(true);
     }
   }, [hasLost]);
 
@@ -65,7 +72,8 @@ const App: React.FC = () => {
   const handleCellClick = (rowParam: number, colParam: number) => (): void => {
     let newCells = cells.slice();
 
-    // start the game
+    // start the game, if in the beginning of game on click is bomb, generate new cells till 1 click is not a bomb
+
     if (!live) {
       let isABomb = newCells[rowParam][colParam].value === CellValue.bomb;
       while (isABomb) {
@@ -80,10 +88,13 @@ const App: React.FC = () => {
 
     let currentCell = newCells[rowParam][colParam];
 
+    // if currentCell state is flagged or visible
+
     if ([CellState.flagged, CellState.visible].includes(currentCell.state)) {
       return;
     }
 
+    // if currentCell value is bomb -> hasLost and red property and show all other bombs, if is none  -> open multiple cells
     if (currentCell.value === CellValue.bomb) {
       setHasLost(true);
       newCells[rowParam][colParam].red = true;
@@ -176,6 +187,7 @@ const App: React.FC = () => {
           row={rowIndex}
           state={cell.state}
           value={cell.value}
+          disabled={disabled}
         />
       ))
     );
