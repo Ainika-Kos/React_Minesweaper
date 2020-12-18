@@ -14,7 +14,7 @@
       }
     },
     "rules": {
-       "object-curly-spacing": ["warn", "always"],
+      "object-curly-spacing": ["warn", "always"],
       "no-unused-vars": [
         "warn",
         {
@@ -63,6 +63,10 @@
           ]
         }
       ],
+      "consistent-return": "off",
+      "no-continue": "off",
+      "no-else-return": "off",
+      "no-useless-return": "off",
       "react/jsx-props-no-spreading": "off",
       "@typescript-eslint/comma-dangle": "off",
       "import/prefer-default-export": "off",

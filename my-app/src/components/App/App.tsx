@@ -1,4 +1,3 @@
-/* eslint-disable consistent-return */
 import React, { useState, useEffect } from 'react';
 import './App.scss';
 import { v4 as uuidv4 } from 'uuid';
@@ -17,6 +16,8 @@ const App: React.FC = () => {
   const [hasLost, setHasLost] = useState<boolean>(false);
   const [hasWon, setHasWon] = useState<boolean>(false);
 
+  // On every mouse down/up change face
+  
   useEffect(() => {
     const handleMouseDown = (): void => {
       setFace(Face.oh);
@@ -64,6 +65,7 @@ const App: React.FC = () => {
   const handleCellClick = (rowParam: number, colParam: number) => (): void => {
     let newCells = cells.slice();
 
+    // start the game
     if (!live) {
       let isABomb = newCells[rowParam][colParam].value === CellValue.bomb;
       while (isABomb) {
@@ -73,13 +75,12 @@ const App: React.FC = () => {
           break;
         }
       }
-
       setLive(true);
     }
 
     let currentCell = newCells[rowParam][colParam];
 
-    if (currentCell.state === CellState.flagged || currentCell.state === CellState.visible) {
+    if ([CellState.flagged, CellState.visible].includes(currentCell.state)) {
       return;
     }
 
@@ -88,21 +89,23 @@ const App: React.FC = () => {
       newCells[rowParam][colParam].red = true;
       newCells = showAllBombs();
       setCells(newCells);
+      return;
     } else if (currentCell.value === CellValue.none) {
       newCells = openMultipleCells(newCells, rowParam, colParam);
     } else {
       newCells[rowParam][colParam].state = CellState.visible;
     }
 
-    // Check to see iw won
-
+    // Check to see if you have won
     let safeOpenCellsExists = false;
-
     for (let row = 0; row < MAX_ROWS; row++) {
       for (let col = 0; col < MAX_COLS; col++) {
         currentCell = newCells[row][col];
 
-        if (currentCell.value !== CellValue.bomb && currentCell.state === CellState.open) {
+        if (
+          currentCell.value !== CellValue.bomb &&
+          currentCell.state === CellState.open
+        ) {
           safeOpenCellsExists = true;
           break;
         }
@@ -110,18 +113,17 @@ const App: React.FC = () => {
     }
 
     if (!safeOpenCellsExists) {
-      newCells.map((row) =>
-        row.map((cell) => {
+      newCells = newCells.map(row =>
+        row.map(cell => {
           if (cell.value === CellValue.bomb) {
             return {
               ...cell,
-              state: CellState.flagged,
+              state: CellState.flagged
             };
           }
           return cell;
         })
       );
-
       setHasWon(true);
     }
 
@@ -137,24 +139,22 @@ const App: React.FC = () => {
       return;
     }
 
-    const currentCellClone = cells.slice();
+    const currentCells = cells.slice();
     const currentCell = cells[rowParam][colParam];
 
     if (currentCell.state === CellState.visible) {
       return;
-    }
-    if (currentCell.state === CellState.open) {
-      currentCellClone[rowParam][colParam].state = CellState.flagged;
-      setCells(currentCellClone);
-      if (bombCounter > -99) {
-        setBombCounter(bombCounter - 1);
-      }
+    } else if (currentCell.state === CellState.open) {
+      currentCells[rowParam][colParam].state = CellState.flagged;
+      setCells(currentCells);
+      setBombCounter(bombCounter - 1);
     } else if (currentCell.state === CellState.flagged) {
-      currentCellClone[rowParam][colParam].state = CellState.open;
-      setCells(currentCellClone);
+      currentCells[rowParam][colParam].state = CellState.open;
+      setCells(currentCells);
       setBombCounter(bombCounter + 1);
     }
   };
+
 
   const handleFaceClick = (): void => {
     setLive(false);
@@ -162,34 +162,33 @@ const App: React.FC = () => {
     setCells(generateCells());
     setHasLost(false);
     setHasWon(false);
-    setBombCounter(10);
   };
 
   const renderCells = (): React.ReactNode => {
     return cells.map((row, rowIndex) =>
       row.map((cell, colIndex) => (
         <Button
-          key={uuidv4()}
-          row={rowIndex}
           col={colIndex}
-          state={cell.state}
-          value={cell.value}
+          key={uuidv4()}
           onClick={handleCellClick}
           onContext={handleCellContext}
           red={cell.red}
+          row={rowIndex}
+          state={cell.state}
+          value={cell.value}
         />
       ))
     );
   };
 
   const showAllBombs = (): Cell[][] => {
-    const currentCell = cells.slice();
-    return currentCell.map((row) =>
-      row.map((cell) => {
+    const currentCells = cells.slice();
+    return currentCells.map(row =>
+      row.map(cell => {
         if (cell.value === CellValue.bomb) {
           return {
             ...cell,
-            state: CellState.visible,
+            state: CellState.visible
           };
         }
 
@@ -197,8 +196,6 @@ const App: React.FC = () => {
       })
     );
   };
-
-  const handleKeyDown = () => {};
 
   return (
     <div className="App">
@@ -209,9 +206,9 @@ const App: React.FC = () => {
           onClick={handleFaceClick}
           role="button"
           tabIndex={0}
-          onKeyDown={handleKeyDown}
+          onKeyDown={handleFaceClick}
         >
-          <span role="img" aria-label="emojy-stars">
+          <span role="img" aria-label="face">
             {face}
           </span>
         </div>

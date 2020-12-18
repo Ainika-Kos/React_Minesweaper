@@ -12,7 +12,7 @@ interface ButtonProps {
   red?: boolean;
 }
 
-export const Button: React.FC<ButtonProps> = ({
+export const Button: React.FC<ButtonProps> = ({ 
   row, col, state, onContext, value, onClick, red }) => {
   const renderContent = (): React.ReactNode => {
     if (state === CellState.visible) {
