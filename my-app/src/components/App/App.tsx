@@ -173,6 +173,7 @@ const App: React.FC = () => {
     setCells(generateCells());
     setHasLost(false);
     setHasWon(false);
+    setBombCounter(10);
   };
 
   const renderCells = (): React.ReactNode => {
